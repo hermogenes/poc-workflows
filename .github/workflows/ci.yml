@@ -11,6 +11,8 @@ jobs:
       affectedProjects: ${{ steps.affected-check.outputs.affectedProjects }}
     steps:
     - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
     - name: Use Node.js 16.x
       uses: actions/setup-node@v3
       with:
@@ -25,7 +27,6 @@ jobs:
     - name: Install Dependencies
       if: steps.modules-cache.outputs.cache-hit != 'true'
       run: npm ci
-    - run: "git fetch"
     - name: Linting
       run: npx nx affected --target=lint
     - name: Test
