@@ -25,6 +25,7 @@ jobs:
     - name: Install Dependencies
       if: steps.modules-cache.outputs.cache-hit != 'true'
       run: npm ci
+    - run: "git branch --track main origin/main"
     - name: Linting
       run: npx nx affected --target=lint
     - name: Test
