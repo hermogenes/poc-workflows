@@ -45,10 +45,10 @@ jobs:
           const { AFFECTED_PROJECTS } = process.env;
           const affectedProjectsArray = JSON.parse(AFFECTED_PROJECTS);
           for (const project of affectedProjectsArray) {
-            octokit.rest.actions.createWorkflowDispatch({
-              context.repo.owner,
-              context.repo.name,
-              `${project}-ci.yml`,
-              context.ref,
+            github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.name,
+              workflow_id: `${project}-ci.yml`,
+              ref: context.ref
             });
           }
