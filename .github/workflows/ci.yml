@@ -47,7 +47,7 @@ jobs:
           for (const project of affectedProjectsArray) {
             github.rest.actions.createWorkflowDispatch({
               owner: context.repo.owner,
-              repo: context.repo.name,
+              repo: context.repo.repo,
               workflow_id: `${project}-ci.yml`,
               ref: context.ref
             });
