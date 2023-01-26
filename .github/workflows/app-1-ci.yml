@@ -1,9 +1,7 @@
 name: App 1 - Pack
 
 on:
-  workflow_run:
-    types: ["completed"]
-    workflows: ["Node.js CI"]
+  workflow_dispatch:
 
 jobs:  
   build:

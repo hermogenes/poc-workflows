@@ -32,4 +32,23 @@ jobs:
       run: npx nx affected --target=lint
     - name: Test
       run: npx nx affected --target=test
-    
+    - name: Export affected projects with build definition
+      id: affected-check
+      run: |
+        echo "affectedProjects=$(npx nx print-affected --type=app --target=all --select=projectGraph.nodes | jq -c -R 'split(", ")')" >> $GITHUB_OUTPUT
+    - name: Trigger affected projects Pack
+      uses: actions/github-script@v6
+      env:
+        AFFECTED_PROJECTS: ${{ steps.affected-check.outputs.affectedProjects }}
+      with:
+        script: |
+          const { AFFECTED_PROJECTS } = process.env;
+          const affectedProjectsArray = JSON.parse(AFFECTED_PROJECTS);
+          for (const project of affectedProjectsArray) {
+            octokit.rest.actions.createWorkflowDispatch({
+              context.repo.owner,
+              context.repo.name,
+              `${project}-ci.yml`,
+              context.ref,
+            });
+          }
