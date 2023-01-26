@@ -1,17 +1,24 @@
-name: App 1 - CI
+name: App 1 - Pack
 
 on:
-  workflow_call:
-    inputs:
-      config-path:
-        required: true
-        type: string
-    secrets:
-      envPAT:
-        required: true
+  workflow_run:
+    types:
+      - "completed"
+    workflows:
+      - "Node.js CI"
 
-jobs:
-  reusable_workflow_job:
+jobs:  
+  build:
+    if: github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     steps:
-    - run: echo 'app-1 run'
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+    - uses: actions/cache@v3
+      id: modules-cache
+      with:
+        path: |
+          **/node_modules
+        key: ${{ runner.os }}-modules-${{ hashFiles('**/package-lock.json') }}    
+    - run: npx nx run app-1:build

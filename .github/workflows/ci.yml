@@ -32,36 +32,4 @@ jobs:
       run: npx nx affected --target=lint
     - name: Test
       run: npx nx affected --target=test
-    - name: Export affected projects with build definition
-      id: affected-check
-      run: |
-        echo "affectedProjects=$(npx nx print-affected --type=app --target=all --select=projectGraph.nodes | jq -c -R 'split(", ")')" >> $GITHUB_OUTPUT
-  
-  trigger-build:
-    needs: continuous-integration-monorepo
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        project: ${{ fromJSON(needs.continuous-integration-monorepo.outputs.affectedProjects) }}
-    name: Trigger Build project ${{ matrix.project }}
-    steps:
-      - uses: actions/checkout@v3
-      - name: Check if ${{ matrix.project }}-ci.yml file exists
-        id: check-ci-file-exists
-        run: |
-          if [ -f ./github/workflows/${{ matrix.project }}-ci.yml ]; then echo "exists=true"; else echo "exists=false"; fi >> $GITHUB_OUTPUT
-      - name: Trigger ${{ matrix.project }} build using workflow_dispatch
-        uses: octokit/request-action@v2.x
-        if: steps.check-ci-file-exists.outputs.exists == 'true'
-        id: get_latest_release
-        with:
-          route: POST /repos/{repository}/actions/workflows/{workflow_id}/dispatches
-          body: '{"ref": "${{ github.ref }}" }'
-          repository: ${{ github.repository }}
-          workflow_id: ${{ matrix.project }}-ci
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Trigger ${{ matrix.project }} build skipped
-        if: steps.check-ci-file-exists.outputs.exists == 'false'
-        run: echo "File ./github/workflows/${{ matrix.project }}-ci.yml does't exist. Skipping build trigger"
     
