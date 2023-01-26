@@ -2,14 +2,11 @@ name: App 1 - Pack
 
 on:
   workflow_run:
-    types:
-      - "completed"
-    workflows:
-      - "Node.js CI"
+    types: ["completed"]
+    workflows: ["Node.js CI"]
 
 jobs:  
   build:
-    if: github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
