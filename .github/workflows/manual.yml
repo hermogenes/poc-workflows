@@ -7,13 +7,16 @@ name: Manual workflow
 on:
   workflow_dispatch:
 
+permissions:
+  id
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains a single job called "greet"
   deploy:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
-
+    permissions:
+      deployments: write
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
     # Runs a single command using the runners shell
@@ -22,5 +25,6 @@ jobs:
       # uses: chrnorm/deployment-action@d42cde7132fcec920de534fffc3be83794335c00
       uses: chrnorm/deployment-action@v2.0.5
       with:
+        token: '${{ github.token }}'
         task: "sync:argocd"
         payload: '{ "service": "lp-build" }'
