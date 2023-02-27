@@ -49,9 +49,12 @@ jobs:
       uses: actions/github-script@v6
       with:
         script: |
-          github.rest.actions.createWorkflowDispatch({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            workflow_id: `${{ matrix.project }}/ci.yml`,
-            ref: context.ref
-          });
+          try {
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: `${{ matrix.project }}/ci.yml`,
+              ref: context.ref
+            });
+          } catch {
+          }
