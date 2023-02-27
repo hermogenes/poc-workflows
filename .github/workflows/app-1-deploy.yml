@@ -1,4 +1,4 @@
-name: App 1 - CI - Pack
+name: App 1 - Deploy
 
 on:
   workflow_dispatch:
