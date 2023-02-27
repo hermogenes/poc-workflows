@@ -1,4 +1,4 @@
-name: Monorepo Validation
+name: K8S app-1 pack
 
 on:
   workflow_dispatch:
@@ -21,6 +21,6 @@ jobs:
       matrix:
         environment: [qa-svc, perf-1, production]
       fail-fast: true
-    name: Build Image k8s-app-1-${{ matric.environment }}@${{ github.head_ref || github.ref_name }}.${{ github.run_number }}
+    name: Build Image k8s-app-1-${{ matrix.environment }}@${{ github.head_ref || github.ref_name }}.${{ github.run_number }}
     steps:
     - run: echo "Image built"
