@@ -1,51 +1,59 @@
 name: Monorepo Validation
 
 on:
+  workflow_dispatch:
   pull_request:
-    branches: [ "main" ]
+    branches:
+      - "main"
+  push:
+    branches:
+      - "main"
 
 jobs:
-  continuous-integration-monorepo:
+  install-dependencies:
     runs-on: ubuntu-latest
-    outputs:
-      affectedProjects: ${{ steps.affected-check.outputs.affectedProjects }}
     steps:
-    - uses: actions/checkout@v3
-      with:
-        fetch-depth: 0
-    - uses: nrwl/nx-set-shas@177b48373c6dc583ce0d9257ffb484bdd232fedf
-    - name: Use Node.js 16.x
-      uses: actions/setup-node@v3
-      with:
-        node-version: 16.x
-        cache: 'npm'
-    - uses: actions/cache@v3
-      id: modules-cache
-      with:
-        path: |
-          **/node_modules
-        key: ${{ runner.os }}-modules-${{ hashFiles('**/package-lock.json') }}
-    - name: Install Dependencies
-      if: steps.modules-cache.outputs.cache-hit != 'true'
-      run: npm ci
-    - name: Linting
-      run: npx nx affected --target=lint
-    - name: Test
-      run: npx nx affected --target=test
-    - name: Export affected projects with build definition
-      id: affected-check
-      run: |
-        echo "affectedProjects=$(npx nx print-affected --type=app --target=all --select=projectGraph.nodes | jq -c -R 'split(", ")')" >> $GITHUB_OUTPUT
-
-  trigger-affected:
+    - run: echo "all the work to install dependencies"
+  validate-checks-all:
     runs-on: ubuntu-latest
-    needs: ["continuous-integration-monorepo"]
+    needs: [install-dependencies]
     strategy:
       matrix:
-        project: ${{ fromJSON(needs['continuous-integration-monorepo'].outputs.affectedProjects) }}
-      fail-fast: false
+        command: [Lint, Check Types, Sonar]
+      fail-fast: true
+    name: ${{ matrix.command }}
     steps:
-    - name: Trigger affected projects Pack
+    - run: echo "${{ matrix.command }}"
+  list-affected:
+    runs-on: ubuntu-latest
+    needs: [install-dependencies]
+    strategy:
+      matrix:
+        command: [Lint, Check Types, Sonar]
+      fail-fast: true
+    name: List affected
+    steps:
+    - run: echo "List affected"
+  test-affected:
+    runs-on: ubuntu-latest
+    needs: [install-dependencies]
+    strategy:
+      matrix:
+        project: [k8s-app-1, static-app-1]
+      fail-fast: true
+    name: Unit Test ${{ matrix.project }} 
+    steps:
+    - run: echo "testing affected"
+  trigger-affected:
+    runs-on: ubuntu-latest
+    needs: [validate-checks-all, list-affected, test-affected]
+    strategy:
+      matrix:
+        project: [k8s-app-1, static-app-1]
+      fail-fast: true
+    name: Triggering ${{ matrix.project }} pack workflow
+    steps:
+    - name: Trigger via octokit
       uses: actions/github-script@v6
       with:
         script: |
@@ -53,7 +61,7 @@ jobs:
             await github.rest.actions.createWorkflowDispatch({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              workflow_id: `${{ matrix.project }}-ci.yml`,
+              workflow_id: `${{ matrix.project }}-pack.yml`,
               ref: context.ref
             });
           } catch {
