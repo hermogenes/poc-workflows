@@ -39,7 +39,7 @@ jobs:
     - name: Trigger affected projects Pack
       uses: actions/github-script@v6
       env:
-        AFFECTED_PROJECTS: ${{ fromJSON(steps.affected-check.outputs.affectedProjects) }}
+        AFFECTED_PROJECTS: ${{ steps.affected-check.outputs.affectedProjects }}
       with:
         script: |
           const { AFFECTED_PROJECTS } = process.env;
