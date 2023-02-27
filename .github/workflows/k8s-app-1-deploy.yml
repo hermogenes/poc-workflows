@@ -1,0 +1,41 @@
+name: K8S app-1 deploy
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        type: string
+        description: 'Environment'
+        required: true
+        default: 'qa-svc'
+
+  workflow_dispatch:
+    inputs:
+      environment:
+        type: string
+        description: 'Environment'
+        required: true
+        default: 'qa-svc'
+
+jobs:
+  get-version:
+    runs-on: ubuntu-latest
+    steps:
+    - run: echo "get version"
+  trigger-argocd:
+    runs-on: ubuntu-latest
+    name: Trigger ArgoCD update
+    needs: [get-version]
+    steps:
+    - run: echo "trigger argocd"
+  wait-argo-cd-polling:
+    runs-on: ubuntu-latest
+    needs: [trigger-argocd]
+    steps:
+    - run: echo "Polling commit status until argocd finish"
+  trigger-e2e:
+    runs-on: ubuntu-latest
+    needs: [wait-argo-cd-polling]
+    name: Triger e2e
+    steps:
+    - run: echo "trigger e2e"

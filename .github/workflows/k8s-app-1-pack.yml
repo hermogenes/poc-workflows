@@ -13,14 +13,37 @@ jobs:
     name: Tagging commit with version ${{ github.head_ref || github.ref_name }}.${{ github.run_number }}
     needs: [generate-version]
     steps:
-    - run: echo "tagging versoin"
-  build-image:
+    - run: echo "tagging version"
+  build-image-qa-svc:
     runs-on: ubuntu-latest
     needs: [tag-commit-with-version]
-    strategy:
-      matrix:
-        environment: [qa-svc, perf-1, production]
-      fail-fast: true
-    name: Build Image k8s-app-1-${{ matrix.environment }}@${{ github.head_ref || github.ref_name }}.${{ github.run_number }}
+    name: Build Image k8s-app-1-qa-svc@${{ github.head_ref || github.ref_name }}.${{ github.run_number }}
     steps:
     - run: echo "Image built"
+  deploy-qa-svc:
+    needs: [build-image-qa-svc]
+    if: github.ref == 'refs/heads/main'
+    uses: ./.github/workflows/k8s-app-1-deploy.yml
+    secrets: inherit
+    with:
+      environment: 'qa-svc'
+  build-image-perf-1:
+    runs-on: ubuntu-latest
+    needs: [tag-commit-with-version]
+    name: Build Image k8s-app-1-perf-1@${{ github.head_ref || github.ref_name }}.${{ github.run_number }}
+    steps:
+    - run: echo "Image built"
+  deploy-perf-1:
+    needs: [build-image-perf-1]
+    if: github.ref == 'refs/heads/main'
+    uses: ./.github/workflows/k8s-app-1-deploy.yml
+    secrets: inherit
+    with:
+      environment: 'perf-1'
+  build-image-production:
+    runs-on: ubuntu-latest
+    needs: [tag-commit-with-version]
+    name: Build Image k8s-app-1-perf-1@${{ github.head_ref || github.ref_name }}.${{ github.run_number }}
+    steps:
+    - run: echo "Image built"
+
