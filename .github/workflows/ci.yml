@@ -1,4 +1,4 @@
-name: Node.js CI
+name: Monorepo Validation
 
 on:
   pull_request:
@@ -39,16 +39,18 @@ jobs:
     - name: Trigger affected projects Pack
       uses: actions/github-script@v6
       env:
-        AFFECTED_PROJECTS: ${{ steps.affected-check.outputs.affectedProjects }}
+        AFFECTED_PROJECTS: ${{ fromJSON(steps.affected-check.outputs.affectedProjects) }}
       with:
         script: |
           const { AFFECTED_PROJECTS } = process.env;
           const affectedProjectsArray = JSON.parse(AFFECTED_PROJECTS);
           for (const project of affectedProjectsArray) {
-            github.rest.actions.createWorkflowDispatch({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              workflow_id: `${project}-ci.yml`,
-              ref: context.ref
-            });
+            try {
+              github.rest.actions.createWorkflowDispatch({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                workflow_id: `${project}/ci.yml`,
+                ref: context.ref
+              });
+            } catch {}
           }
