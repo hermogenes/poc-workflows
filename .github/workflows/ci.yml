@@ -42,7 +42,7 @@ jobs:
     needs: ["continuous-integration-monorepo"]
     strategy:
       matrix:
-        project: ${{ fromJSON(needs.continuous-integration-monorepo.affectedProjects) }}
+        project: ${{ fromJSON(needs['continuous-integration-monorepo'].outputs.affectedProjects) }}
       fail-fast: false
     steps:
     - name: Trigger affected projects Pack
