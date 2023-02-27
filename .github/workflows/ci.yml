@@ -36,21 +36,22 @@ jobs:
       id: affected-check
       run: |
         echo "affectedProjects=$(npx nx print-affected --type=app --target=all --select=projectGraph.nodes | jq -c -R 'split(", ")')" >> $GITHUB_OUTPUT
+
+  trigger-affected:
+    runs-on: ubuntu-latest
+    needs: ["continuous-integration-monorepo"]
+    strategy:
+      matrix:
+        project: ${{ fromJSON(needs.continuous-integration-monorepo.affectedProjects) }}
+      fail-fast: false
+    steps:
     - name: Trigger affected projects Pack
       uses: actions/github-script@v6
-      env:
-        AFFECTED_PROJECTS: ${{ steps.affected-check.outputs.affectedProjects }}
       with:
         script: |
-          const { AFFECTED_PROJECTS } = process.env;
-          const affectedProjectsArray = JSON.parse(AFFECTED_PROJECTS);
-          for (const project of affectedProjectsArray) {
-            try {
-              github.rest.actions.createWorkflowDispatch({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                workflow_id: `${project}/ci.yml`,
-                ref: context.ref
-              });
-            } catch {}
-          }
+          github.rest.actions.createWorkflowDispatch({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            workflow_id: `${{ matrix.project }}/ci.yml`,
+            ref: context.ref
+          });
