@@ -6,7 +6,6 @@ on:
 jobs:  
   build:
     runs-on: ubuntu-latest
-    needs: [ "app-1-version" ]
     steps:
     - uses: actions/checkout@v3
       with:
@@ -40,4 +39,3 @@ jobs:
             });
           } catch {
           }
-
