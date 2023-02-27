@@ -33,6 +33,6 @@ jobs:
             conclusion: 'success',
             output: { title: '${{ github.head_ref || github.ref_name }}.${{ github.run_number }}', summary: '${{ github.head_ref || github.ref_name }}.${{ github.run_number }}', description: '${{ github.head_ref || github.ref_name }}.${{ github.run_number }}' },
             actions: [
-              { label: 'Deploy to qa-svc', identifier: 'miro:deploy' }
+              { label: 'Deploy to qa-svc', identifier: 'miro:deploy', description: 'Deploy to qa-svc' }
             ]
           });
