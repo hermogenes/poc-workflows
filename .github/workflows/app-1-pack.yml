@@ -24,18 +24,15 @@ jobs:
       uses: actions/github-script@v6
       with:
         script: |
-          try {
-            await github.rest.checks.create({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              name: 'app-1-version',
-              head_sha: context.ref,
-              status: 'completed',
-              conclusion: 'success',
-              output: { title: '${{ github.head_ref || github.ref_name }}.${{ github.run_number }}' },
-              actions: [
-                { label: 'Deploy to qa-svc', identifier: 'miro:deploy' }
-              ]
-            });
-          } catch {
-          }
+          await github.rest.checks.create({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            name: 'app-1-version',
+            head_sha: context.ref,
+            status: 'completed',
+            conclusion: 'success',
+            output: { title: '${{ github.head_ref || github.ref_name }}.${{ github.run_number }}' },
+            actions: [
+              { label: 'Deploy to qa-svc', identifier: 'miro:deploy' }
+            ]
+          });
