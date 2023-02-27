@@ -6,6 +6,8 @@ on:
 jobs:  
   app-1-version:
     runs-on: ubuntu-latest
+    outputs:
+      app-1-version: ${{ steps.generate-version.version }}
     steps:
     - id: generate-version
       run:  |
