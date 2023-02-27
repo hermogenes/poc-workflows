@@ -27,16 +27,12 @@ jobs:
   list-affected:
     runs-on: ubuntu-latest
     needs: [install-dependencies]
-    strategy:
-      matrix:
-        command: [Lint, Check Types, Sonar]
-      fail-fast: true
     name: List affected
     steps:
     - run: echo "List affected"
   test-affected:
     runs-on: ubuntu-latest
-    needs: [install-dependencies]
+    needs: [install-dependencies, validate-checks-all]
     strategy:
       matrix:
         project: [k8s-app-1, static-app-1]
